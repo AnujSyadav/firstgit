@@ -1,0 +1,162 @@
+
+-----------------------------------------------------Creating All Data -----------------------------------------------------------------------------------------
+
+create table employee(
+	eid int identity(2400,5) primary key,
+	ename varchar(20),
+	edesig varchar(20),
+	Dob varchar(20),
+	Adid int foreign key references addressemp(adid),
+	tid varchar(20) foreign key references technology(tid)
+)
+
+
+alter table employee add LangId varchar(20) 
+alter table employee drop column Langid 
+
+insert into employee values ('Shreya','Tester','2021-06-18',2002,'T004')
+
+
+select * from employee
+select * from emplang
+select * from addressemp
+select * from userinfo
+select * from language
+select * from technology
+
+
+create table addressemp (Adid int primary key , Hno varchar(20),Build varchar(20),Zipcode varchar(20)) 
+drop table addressemp
+insert into addressemp values (2002,'Sector-18','Fortis',895898)
+
+create table technology (tid varchar(20) primary key,tname varchar(20))
+select * from technology
+insert into technology values ('T001','Asp.Net'),('T002','C#'),('T003','Angular'),('T004','PHP'),('T005','Java')
+
+create table language (lid varchar(20) primary key,lname varchar(20))
+insert into language values ('L001','Hindi'),('L002','English'),('L003','French'),('L004','German')
+select * from language 
+
+
+create table userinfo (uid int identity primary key,eid int foreign key references employee(eid),email varchar(20), pass varchar(20))
+insert into userinfo values  (2440,'shreya@gmail.com','Shreya@123')
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+alter proc Chooselangnew (@l1 varchar(20),@l2 varchar(20),@l3 varchar(20), @l4 varchar(20),@eid int)
+as
+declare @langvar varchar(20)
+select @langvar = String_agg(lname ,',') from language where lid in (@l1,@l2,@l3,@l4)
+update emplang set langname = @langvar where eid = @eid
+
+chooselangnew 'L001','002','L003','004',2505
+select * from employee
+select * from emplang
+
+alter table emplang add langname varchar(20)
+
+drop proc chooselangnew
+
+
+create table emplang ( eid int primary key, elangid varchar(20))
+select * from emplang
+
+--------------------------------------------GetAllData------------------------------------------------------------------------------------------------------------
+create proc GetAllDataNEw
+as
+select e.eid,e.ename,e.edesig,e.dob, a.hno,a.build,a.zipcode,t.tname,u.email,u.pass,ep.langname from employee as e
+join addressemp as a on a.adid = e.adid join technology as t on t.tid = e.tid join userinfo as u on u.eid = e.eid join emplang as ep on ep.eid = e.eid
+
+
+getalldatanew
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+-------------------------------------------------------------DeleteData--------------------------------------------------------------------------------------------
+alter proc DeleteData(@eid int)
+as
+delete from emplang where eid = @eid
+delete from userinfo where eid = @eid
+declare @adid int 
+select @adid = adid from employee where eid = @eid
+delete from employee where eid = @eid
+delete from addressemp where adid = @adid
+
+Deletedata 2495
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------ShowData--------------------------------------------------------------------------------------------------
+
+create proc showdatanew(@id int)
+as
+select e.eid,e.ename,e.edesig,e.dob,a.adid,a.hno,a.build,a.zipcode,u.email,u.pass,t.tid from employee as e
+join addressemp as a on a.adid = e.adid join userinfo as u on u.eid = e.eid join technology as t on t.tid = e.tid
+where e.eid = @id
+
+drop proc showdata 2475
+
+create proc showlang(@id int)
+as
+select lid from language where lid in (select value from emplang cross apply string_split (elangid,',') where eid = @id)
+
+showlang 2495
+
+
+select value from emplang cross apply string_split (elangid,',') where eid = 2475
+select * from emplang where eid = 2475
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------AddData------------------------------------------------------------------------------------------------------------
+
+
+alter proc AddData(@name varchar(20),@desig varchar(20),@dob varchar(20),@adid int , @hno varchar(20),@build varchar(20), @zip varchar(20),
+@tid varchar(20),@email varchar(20),@pass varchar(20),@l1 varchar(20),@l2 varchar(20),@l3 varchar(20), @l4 varchar(20))
+as
+insert into addressemp values (@adid,@hno,@build,@zip)
+insert into employee values (@name,@desig,@dob,@adid,@tid)
+declare @id int 
+select @id = eid from employee where ename = @name
+insert into userinfo values (@id,@email,@pass)
+declare @langvar varchar(20)
+select @langvar = String_agg(lid ,',') from language where lid in (@l1,@l2,@l3,@l4)
+declare @langvar1 varchar(20)
+select @langvar1 = String_agg(lname ,',') from language where lid in (@l1,@l2,@l3,@l4)
+insert into emplang values (@id,@langvar,@langvar1)
+
+AddData 'Anuj','Sr.Tester','1999-05-28',2045,'Noida','Extension',2578,'T002','anuj@gmail.com','Noor@123','000','L002','L003','L004'
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------EditData------------------------------------------------------------------------------------------------------
+
+
+@tid varchar(20),@email varchar(20),@pass varchar(20),@l1 varchar(20),@l2 varchar(20),@l3 varchar(20), @l4 varchar(20))
+as
+update addressemp set hno=@hno, build = @build, zipcode = @zip where adid = @adid
+update employeecreate proc EditDatanew(@id int,@name varchar(20),@desig varchar(20),@dob varchar(20),@adid int, @hno varchar(20),@build varchar(20), @zip varchar(20),
+ set ename = @name, edesig = @desig, dob = @dob, tid = @tid where eid = @id
+update userinfo set email = @email, pass = @pass
+declare @langvar varchar(20)
+select @langvar = String_agg(lname ,',') from language where lid in (@l1,@l2,@l3,@l4)
+declare @langvar1 varchar(20)
+select @langvar1 = String_agg(lid ,',') from language where lid in (@l1,@l2,@l3,@l4)
+update emplang set langname = @langvar , elangid=@langvar1 where eid = @id
+
+drop proc editdatanew
+
+EditDatanew 2475,'shreya','Sr.Developer','1999-06-18',2008,'Vishambher','Yadav Nagar',208007,'T003','shreya@gmail.com','Shreya@123','L001','L002','000','000'
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
