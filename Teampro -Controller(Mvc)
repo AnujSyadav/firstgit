@@ -1,0 +1,134 @@
+using CaptchaMvc.HtmlHelpers;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Security;
+using TeamProMvc.Models;
+
+namespace TeamProMvc.Controllers
+{
+    
+   [Authorize]
+    public class EmpMvcController : Controller
+    {
+        [HttpGet]
+        [AllowAnonymous] 
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public ActionResult Login(EmpMvcModel obj)
+        {
+
+            HttpClient client = new HttpClient();
+            var data = JsonConvert.SerializeObject(obj);
+            StringContent postdata = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+            var data1 = client.PostAsync("http://localhost:54982/api/User", postdata).Result;
+            var readdata = data1.Content.ReadAsStringAsync().Result;
+            var empdata = JsonConvert.DeserializeObject<string>(readdata);
+
+
+            if (empdata == "no")
+            {
+                TempData["Invalid Email"] = "Email Not founded Please Register First";
+            }
+
+            else
+            {
+                if (empdata == "yes" && this.IsCaptchaValid("Captcha is Not valid"))
+                {
+                    Session["Name"] = "Hello";
+                    Session["Email"] = obj.email;
+                    FormsAuthentication.SetAuthCookie(obj.email, false);
+                    return RedirectToAction("ReadData");
+                }
+                else
+                {
+
+                    if (empdata == "nopass")
+                    {
+                        TempData["Invalid Password"] = "Password is invalid(Sahi se Yaad karo)";
+                    }
+                    else
+                    {
+                        TempData["Invalid Captcha"] = "Captcha is not valid";
+                    }
+                }
+            }
+            return View();
+
+        }
+        public ActionResult Logout()
+          {
+              FormsAuthentication.SignOut();
+              Session.Clear();
+              return RedirectToAction("Login");
+          }
+       
+
+        public ActionResult ReadData()
+        {
+            HttpClient client = new HttpClient();
+            var data = client.GetAsync("http://localhost:54982/api/Read").Result;
+            var readdata = data.Content.ReadAsStringAsync().Result;
+            var empdata = JsonConvert.DeserializeObject<List<EmpMvcModel>>(readdata);
+            return View(empdata);
+        }
+
+        [HttpGet]
+        public ActionResult AddEmp()
+        {
+            Session["Check"] = "Add";
+            HttpClient client = new HttpClient();
+            var data = client.GetAsync("http://localhost:54982/api/Techno").Result;
+            var readdata = data.Content.ReadAsStringAsync().Result;
+            var empdata = JsonConvert.DeserializeObject<List<EmpMvcModel>>(readdata);
+            ViewBag.List = new SelectList(empdata, "tid", "tname");
+            return View();
+
+
+        }
+        [HttpPost]
+        public ActionResult AddEmp(EmpMvcModel obj, bool h, bool e, bool f, bool g)
+        {
+            HttpClient client = new HttpClient();
+            var data = JsonConvert.SerializeObject(obj);
+            StringContent postdata = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+            var result = client.PostAsync("http://localhost:54982/api/AddData" +"?h="+h+"&e="+e+"&f=" + f + "&g=" +g,postdata).Result;
+            return RedirectToAction("ReadData");
+        }
+
+        public ActionResult Delete(int eid)
+        {
+            HttpClient client = new HttpClient();
+            var data = client.GetAsync("http://localhost:54982/api/DeleteData" + "?eid=" + eid).Result;
+            return RedirectToAction("ReadData");
+        }
+
+        public ActionResult Edit(int eid)
+        {
+            HttpClient client = new HttpClient();
+            var data = client.GetAsync("http://localhost:54982/api/EditData" + "?eid=" + eid).Result;
+            var readdata = data.Content.ReadAsStringAsync().Result;
+            var empdata = JsonConvert.DeserializeObject<EmpMvcModel>(readdata);
+
+
+            Session["Check"] = "Edit";
+           
+            var data1 = client.GetAsync("http://localhost:54982/api/Techno").Result;
+            var readdata1 = data1.Content.ReadAsStringAsync().Result;
+            var empdata1 = JsonConvert.DeserializeObject<List<EmpMvcModel>>(readdata1);
+            ViewBag.List = new SelectList(empdata1, "tid", "tname");
+            return View("AddEmp", empdata);
+        }
+
+
+    }
+}
