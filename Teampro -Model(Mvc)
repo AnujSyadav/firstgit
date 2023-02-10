@@ -1,0 +1,46 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+
+namespace TeamProMvc.Models
+{
+    public class EmpMvcModel
+    {
+        public int eid { get; set; }
+        [Required(ErrorMessage = "Name Daal Do Please")]
+        public string ename { get; set; }
+
+        [Required(ErrorMessage = "Designation Daal Do Please")]
+        public string edesig { get; set; }
+        [Required(ErrorMessage = "Dharti pe janam liye to date to hogi")]
+        public string Dob { get; set; }
+        [Required(ErrorMessage = "Lappata ho kya Address Id jarurai hai ")]
+        public Nullable<int> Adid { get; set; }
+        [Required(ErrorMessage = "Technology neccessary ")]
+        public string tid { get; set; }
+        public string LangId { get; set; }
+        public string lid { get; set; }
+        public string lname { get; set; }
+        [Required(ErrorMessage = "Email ke bina kaam nahi chalgea")]
+        [EmailAddress]
+        public string email { get; set; }
+        [Required(ErrorMessage = "Seceret Rakho magar Dalo to")]
+        public string pass { get; set; }
+        [Required(ErrorMessage = "Technology neccessary ")]
+        public string tname { get; set; }
+        public string langname { get; set; }
+        [Required(ErrorMessage = "House No. can't be empty")]
+        public string Hno { get; set; }
+        [Required(ErrorMessage = "Building can't be empty")]
+        public string Build { get; set; }
+        [Required(ErrorMessage = "Zipcode can't be empty")]
+        public string Zipcode { get; set; }
+        public string l1 { get; set; }
+        public string l2 { get; set; }
+        public string l3 { get; set; }
+        public string l4 { get; set; }
+
+    }
+}
