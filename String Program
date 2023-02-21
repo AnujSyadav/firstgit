@@ -1,0 +1,42 @@
+
+// string given = "abc5bc3"  to "abc11111bc111" 
+
+
+
+
+
+
+class Demo
+{
+    static void Main()
+    {
+        string inputstring = "abc5bc3";
+        string y = solution(inputstring);
+        Console.WriteLine(y);
+        Console.ReadLine();
+
+    }
+
+    public static string solution(string inputstring)
+    {
+        string x = null;
+        int count = 0;
+        for (int i = 0; i < inputstring.Length; i++)
+        {
+            if (inputstring[i] >= 48 && inputstring[i] <= 57)
+            {
+                count = inputstring[i]-48;
+                for (int j = 0; j < count; j++)
+                {
+                    x = x + 1;
+                }
+            }
+            else
+            {
+                x = x + inputstring[i];
+            }        
+            
+        }
+        return x;
+    }
+}
